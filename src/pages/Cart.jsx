@@ -6,6 +6,17 @@ import { useSelector } from "react-redux";
 
 function Cart() {
   const cart = useSelector((state) => state.products.cart);
+
+  // Calculate subtotal from all cart items
+  const subtotal = cart.reduce((total, item) => {
+    return total + item.price * item.quantity;
+  }, 0);
+
+  // Shipping is free (0)
+  const shipping = 0;
+
+  // Total = subtotal + shipping
+  const total = subtotal + shipping;
   return (
     <section id={"cart"}>
       <div className="container">
@@ -30,7 +41,7 @@ function Cart() {
               name={item.title}
               price={item.price}
               quantity={item.quantity}
-              subtotal={item.price}
+              subtotal={item.price * item.quantity}
             />
           ))
         )}
@@ -78,7 +89,7 @@ function Cart() {
               }
             >
               <h2 className={"text-black"}>Subtotal:</h2>
-              <span>$1750</span>
+              <span>${subtotal.toFixed(2)}</span>
             </div>
             <div
               className={
@@ -86,13 +97,13 @@ function Cart() {
               }
             >
               <h2 className={"text-black"}>Shipping:</h2>
-              <span>$0</span>
+              <span>${shipping.toFixed(2)}</span>
             </div>
             <div
               className={"total mt-4 flex justify-between items-center pb-4"}
             >
               <h2 className={"text-black"}>Total:</h2>
-              <span>$1750</span>
+              <span>${total.toFixed(2)}</span>
             </div>
             <CommonButton
               name={"Proceed to checkout"}

@@ -1,16 +1,42 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import logo from "../assets/Logo.png";
 import { Link, useNavigate } from "react-router";
 import { FiSearch, FiMenu, FiX } from "react-icons/fi";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { FaRegHeart } from "react-icons/fa";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
+import { setProducts } from "../redux/productSlice";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const [searchedProducts, setSearchedProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState([]);
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    document.title = "Shop | Exclusive";
+    axios
+      .get("https://dummyjson.com/products")
+      .then((res) => {
+        const products = res.data.products;
+
+        dispatch(setProducts(res.data.products));
+        setData(products);
+        {
+          products ? console.log("api fetched successfully.") : "fetching...";
+        }
+      })
+      .catch(console.error);
+  }, [dispatch]);
+
   const navigate = useNavigate();
   const cart = useSelector((state) => state.products.cart);
   const wishList = useSelector((state) => state.products.wishList);
+  const allProducts = useSelector((state) => state.products.value);
 
   const navLinks = [
     { title: "Home", path: "/" },
@@ -22,6 +48,19 @@ const Navbar = () => {
   const handleCartNavigate = () => {
     navigate("/cart");
   };
+
+  const handleSearch = (e) => {
+    const userInput = e.target.value.toLowerCase().trim();
+
+    if (!userInput) return setSearchedProducts([]);
+
+    setSearchValue(userInput);
+    const filteredProducts = allProducts.filter((item) =>
+      item.title.toLowerCase().includes(userInput),
+    );
+    setSearchedProducts(filteredProducts);
+  };
+
 
   return (
     <div className="pb-7">
@@ -61,7 +100,29 @@ const Navbar = () => {
               type="text"
               placeholder="What are you looking for?"
               className="bg-inputbg py-1.75 pr-3 pl-5 shadow-sm w-60.75 placeholder:text-[12px] outline-0 rounded-md"
+              onChange={handleSearch}
+              value={searchValue}
             />
+            <div className="absolute top-10 left-0 z-50 max-h-105 overflow-hidden rounded-lg w-60.75">
+              <ul>
+                {searchedProducts.map((item) => (
+                  <li
+                    key={item.id}
+                    className="bg-inputbg shadow-lg px-4 py-4 border-b border-b-gray-300 flex gap-2 items-center cursor-pointer"
+                    onClick={() => {
+                      navigate(`product-details/${item.id}`);
+                      setSearchValue("");
+                      setSearchedProducts([]);
+                    }}
+                  >
+                    <span className="w-10">
+                      <img src={item.thumbnail} alt="product-image" />
+                    </span>
+                    {item.title.slice(0, 14)}
+                  </li>
+                ))}
+              </ul>
+            </div>
             <button className="absolute right-3.5 top-2 text-xl">
               <FiSearch />
             </button>
@@ -73,7 +134,9 @@ const Navbar = () => {
           >
             <FaRegHeart className="text-2xl hidden lg:block" />
             {wishList.length > 0 ? (
-              <span className="absolute text-xs px-0.75 py-0.5 text-white bg-red-primary rounded-full -top-2.5 -right-2">{wishList.length}</span>
+              <span className="absolute text-xs px-0.75 py-0.5 text-white bg-red-primary rounded-full -top-2.5 -right-2">
+                {wishList.length}
+              </span>
             ) : (
               <></>
             )}
@@ -84,7 +147,9 @@ const Navbar = () => {
           >
             <AiOutlineShoppingCart className="text-3xl hidden lg:block" />
             {cart.length > 0 ? (
-              <span className="absolute text-xs px-1 py-px text-white bg-red-primary rounded-full -top-1 -right-1">{cart.length}</span>
+              <span className="absolute text-xs px-1 py-px text-white bg-red-primary rounded-full -top-1 -right-1">
+                {cart.length}
+              </span>
             ) : (
               <></>
             )}
