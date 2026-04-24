@@ -5,7 +5,7 @@ import {createBrowserRouter, RouterProvider} from 'react-router'
 import RootLayout from './layouts/PrimaryLayout'
 import Home from './pages/Home'
 import {Provider} from 'react-redux'
-import Store from './Redux/Store'
+import Store from './redux/Store'
 import ProductDetails from './pages/ProductDetails'
 import Cart from "./pages/Cart.jsx";
 import Wishlist from "./pages/Wishlist.jsx"
